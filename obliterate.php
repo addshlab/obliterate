@@ -20,9 +20,9 @@ class Obliterate {
         add_action( 'template_redirect', array( $this,'disable_all_comment_form' ) );
 
         # REST API無効化
-        remove_action( 'template_redirect', 'rest_output_link_header', 11 );
-        remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
-        add_filter( 'rest_authentication_errors', array( $this, 'disable_rest_api') );
+//        remove_action( 'template_redirect', 'rest_output_link_header', 11 );
+//        remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
+//        add_filter( 'rest_authentication_errors', array( $this, 'disable_rest_api') );
 
         # コメントフィード機能の無効化
         add_action( 'do_feed_rss2', array( $this, 'remove_comment_feeds' ), 9, 1 );
