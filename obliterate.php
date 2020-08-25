@@ -18,6 +18,13 @@ class Obliterate {
         add_filter( 'query_vars', array( $this, 'disable_author_archive' ) );
         add_action( 'init', array( $this, 'disable_xml_rpc' ) );
         add_action( 'template_redirect', array( $this,'disable_all_comment_form' ) );
+        add_action( 'template_redirect', array( $this,'redirect_author_to_home' ) );
+//        add_filter( 'wp_sitemaps_users_entry', array( $this, 'disable_sitemaps_users_entry'), 99, 1 );
+//        add_filter( 'wp_sitemaps_index_entry', array( $this, 'disable_wp_sitemaps_index_entry'), 99, 2 );
+
+//	  add_filter( 'wp_sitemaps_users_query_args', array( $this, 'hide_user_from_sitemap_index' ), 99, 1 );
+//        add_filter( 'wp_sitemaps_users_pre_url_list', array( $this, 'disable_user_from_sitemap_users' ), 99, 2 );
+        add_filter( 'wp_sitemaps_add_provider', array( $this, 'disable_all_user_from_sitemap' ), 99, 2 );
 
         # REST API無効化
 //        remove_action( 'template_redirect', 'rest_output_link_header', 11 );
@@ -39,8 +46,8 @@ class Obliterate {
         # ブロックエディタの自動保存長期遅延
         add_filter( 'block_editor_settings', 'custom_autosave_interval' );
 
-		# emoji関連の排除
-		remove_action( 'wp_head', 'wp_generator' );
+        # emoji関連の排除
+        remove_action( 'wp_head', 'wp_generator' );
         remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
         remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
         remove_action( 'wp_print_styles', 'print_emoji_styles' );
@@ -58,13 +65,37 @@ class Obliterate {
     public function disable_author_archive( $vars ) {
         if( ( $key = array_search( 'author', $vars ) ) !== false) {
             unset( $vars[$key] );
-        }
+	}
         return $vars;
-	}
+    }
 
-	public function disable_all_comment_form() {
-		add_filter( 'comments_open', array( $this, '__return_false' ) );
+    public function redirect_author_to_home() {
+        if ( is_author() ) :
+    	    wp_redirect( home_url() );
+            exit;
+        endif;
+    }
+
+    public function disable_all_user_from_sitemap ( $provider, $name ) {
+	if ( 'users' === $name ) {
+            return null;
 	}
+        return $provider;
+    }
+
+    public function hide_user_from_sitemap_index ( $array ) {
+        $array = [];
+	return $array;
+    } 
+
+    public function disable_user_from_sitemap_users ( $var, $page_num) {
+	$var = 0;
+        return $var;
+    }
+
+    public function disable_all_comment_form() {
+        add_filter( 'comments_open', array( $this, '__return_false' ) );
+    }
 
     public function remove_comment_feeds( $for_comments ) {
         if( $for_comments ){
